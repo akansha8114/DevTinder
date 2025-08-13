@@ -3,17 +3,12 @@ const connectDB = require('./config/database');
 const app = express();
 const User = require('./models/user'); // Assuming you have a User model defined
 
+app.use(express.json()); // Middleware to parse JSON bodies
+
 //Creating a psot Api key for signup
 app.post("/signup", async (req,res)=>{
     //Creating a new instance of the new user model
-    const user = new User({
-        firstName : "Aakansha",
-        lastName : "Singh",    
-        email : "Aakansha@.com",
-        password : "Aakansha@123",
-        age : 20,    
-        gender : "Female"
-    });
+    const user = new User(req.body);  //req.body returns the JS object which contains the user data from the request body
     try{
         await user.save();   //Saving the user to the database
         res.send("User created successfully");
