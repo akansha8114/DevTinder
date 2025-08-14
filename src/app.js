@@ -54,13 +54,22 @@ app.delete("/user", async(req,res)=>{
 });
 
 //Updating data of a user
-app.patch("/user", async(req,res)=>{
-    const userId = req.body.userId;
+app.patch("/user/:userId", async(req,res)=>{
+    const userId = req.params?.userId; // Extracting userId dynamically from the request parameters
     const updateData = req.body; // Assuming updateData contains the fields to be updated
     try{
+        const ALLOWED_UPDATES = ["photourl","about","gender","age","skills"];
+        const isUpdateAllowed = Object.keys(updateData).every((k) =>  // Checking if the keys we are updatingis allowed to be updated or not
+            ALLOWED_UPDATES.includes(k)
+        );
+        if(!isUpdateAllowed){
+            throw new error("Update not allowed")
+        }
+
         const user = await User.findByIdAndUpdate({_id:userId}, updateData, {
             runValidators:true ,// This option ensures that the validators are run on the updated fields
         });
+
         res.send("User updated successfully");
     }catch(err){
         res.status(500).send("Error updating user "+ err.message );
