@@ -15,7 +15,7 @@ app.post("/signup", async (req,res)=>{
         res.send("User created successfully");
     }catch(err){
         console.error("Error creating user:", err);
-        res.status(400).send("Internal Server Error");
+        res.status(400).send("Internal Server Error "+ err.message);
     }
     
 });
