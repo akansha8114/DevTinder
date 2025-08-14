@@ -1,91 +1,104 @@
-const express = require('express');
-const connectDB = require('./config/database');
+const express = require("express");
+const connectDB = require("./config/database");
 const app = express();
-const User = require('./models/user'); // Assuming you have a User model defined
-const { ReturnDocument } = require('mongodb');
+const User = require("./models/user"); // Assuming you have a User model defined
+const { ReturnDocument } = require("mongodb");
+const validateSignupData = require("./utils/validation"); // Importing the validation function
+const bcrypt = require("bcrypt"); // Importing bcrypt for password hashing
 
 app.use(express.json()); // Middleware to parse JSON bodies
 
 //Creating a psot Api key for signup
-app.post("/signup", async (req,res)=>{
+app.post("/signup", async (req, res) => {
+  try {
+    //Validation of data
+    validateSignupData(req); // This will throw an error if validation fails
+    const { firstName, lastName, email, password } = req.body;   // Destructuring the request body to get user data
+
+    //Encrypt the password before saving it to the database
+
+    const passwordhash = await bcrypt.hash(password, 10); // Hashing the password with a salt rounds of 10
+
     //Creating a new instance of the new user model
-    const user = new User(req.body);  //req.body returns the JS object which contains the user data from the request body
-    try{
-        await user.save();   //Saving the user to the database
-        res.send("User created successfully");
-    }catch(err){
-        console.error("Error creating user:", err);
-        res.status(400).send("Internal Server Error "+ err.message);
-    }
-    
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      password: passwordhash, // Storing the hashed password
+    });
+
+    await user.save(); //Saving the user to the database
+    res.send("User created successfully");
+  } catch (err) {
+    console.error("Error creating user:", err);
+    res.status(400).send("Internal Server Error " + err.message);
+  }
 });
 
 //Try to find a user by email : Using a get API
-app.get("/user", async(req,res)=>{
-    const userEmail = req.body.email;
-    try{
-        const user = await User.find({email : userEmail});
-        res.send(user);
-    }catch(err){
-        res.status(400).send("User not found");
-    }
-
+app.get("/user", async (req, res) => {
+  const userEmail = req.body.email;
+  try {
+    const user = await User.find({ email: userEmail });
+    res.send(user);
+  } catch (err) {
+    res.status(400).send("User not found");
+  }
 });
 
 //Feed API to get all users on the feed of the user app to swipe left or right
-app.get("/feed",async(req,res)=>{
-    try{
-        const users = await User.find({});  //This will return all users in the database
-        res.send(users);
-    }catch(err){
-        res.status(500).send("Error fetching users");
-    }
+app.get("/feed", async (req, res) => {
+  try {
+    const users = await User.find({}); //This will return all users in the database
+    res.send(users);
+  } catch (err) {
+    res.status(500).send("Error fetching users");
+  }
 });
 
 //Deleting a user by ID
-app.delete("/user", async(req,res)=>{
-    const userId = req.body.userId;
-    try{
-        const user = await User.findByIdAndDelete(userId);
-        res.send("User deleted successfully");
-    }catch(err){
-        res.status(500).send("Error deleting user");
-    }
+app.delete("/user", async (req, res) => {
+  const userId = req.body.userId;
+  try {
+    const user = await User.findByIdAndDelete(userId);
+    res.send("User deleted successfully");
+  } catch (err) {
+    res.status(500).send("Error deleting user");
+  }
 });
 
 //Updating data of a user
-app.patch("/user/:userId", async(req,res)=>{
-    const userId = req.params?.userId; // Extracting userId dynamically from the request parameters
-    const updateData = req.body; // Assuming updateData contains the fields to be updated
-    try{
-        const ALLOWED_UPDATES = ["photourl","about","gender","age","skills"];
-        const isUpdateAllowed = Object.keys(updateData).every((k) =>  // Checking if the keys we are updatingis allowed to be updated or not
-            ALLOWED_UPDATES.includes(k)
-        );
-        if(!isUpdateAllowed){
-            throw new error("Update not allowed")
-        }
-
-        const user = await User.findByIdAndUpdate({_id:userId}, updateData, {
-            runValidators:true ,// This option ensures that the validators are run on the updated fields
-        });
-
-        res.send("User updated successfully");
-    }catch(err){
-        res.status(500).send("Error updating user "+ err.message );
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId; // Extracting userId dynamically from the request parameters
+  const updateData = req.body; // Assuming updateData contains the fields to be updated
+  try {
+    const ALLOWED_UPDATES = ["photourl", "about", "gender", "age", "skills"];
+    const isUpdateAllowed = Object.keys(updateData).every(
+      (
+        k // Checking if the keys we are updatingis allowed to be updated or not
+      ) => ALLOWED_UPDATES.includes(k)
+    );
+    if (!isUpdateAllowed) {
+      throw new error("Update not allowed");
     }
-});
 
- 
-
-connectDB()
-  .then(() =>{
-    console.log("Database connected successfully");
-    app.listen(3000,()=>{
-        console.log("Server is running on port 3000");
-    })
-  })
-    .catch((err) => {
-        console.error("Error cannot connect the databse");
+    const user = await User.findByIdAndUpdate({ _id: userId }, updateData, {
+      runValidators: true, // This option ensures that the validators are run on the updated fields
     });
 
+    res.send("User updated successfully");
+  } catch (err) {
+    res.status(500).send("Error updating user " + err.message);
+  }
+});
+
+connectDB()
+  .then(() => {
+    console.log("Database connected successfully");
+    app.listen(3000, () => {
+      console.log("Server is running on port 3000");
+    });
+  })
+  .catch((err) => {
+    console.error("Error cannot connect the databse");
+  });
