@@ -2,6 +2,7 @@ const express = require('express');
 const connectDB = require('./config/database');
 const app = express();
 const User = require('./models/user'); // Assuming you have a User model defined
+const { ReturnDocument } = require('mongodb');
 
 app.use(express.json()); // Middleware to parse JSON bodies
 
@@ -14,7 +15,7 @@ app.post("/signup", async (req,res)=>{
         res.send("User created successfully");
     }catch(err){
         console.error("Error creating user:", err);
-        res.status(500).send("Internal Server Error");
+        res.status(400).send("Internal Server Error");
     }
     
 });
@@ -57,10 +58,12 @@ app.patch("/user", async(req,res)=>{
     const userId = req.body.userId;
     const updateData = req.body; // Assuming updateData contains the fields to be updated
     try{
-        const user = await User.findByIdAndUpdate({_id:userId}, updateData, );
+        const user = await User.findByIdAndUpdate({_id:userId}, updateData, {
+            runValidators:true ,// This option ensures that the validators are run on the updated fields
+        });
         res.send("User updated successfully");
     }catch(err){
-        res.status(500).send("Error updating user");
+        res.status(500).send("Error updating user "+ err.message );
     }
 });
 
