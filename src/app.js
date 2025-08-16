@@ -5,15 +5,18 @@ const User = require("./models/user"); // Assuming you have a User model defined
 const { ReturnDocument } = require("mongodb");
 const validateSignupData = require("./utils/validation"); // Importing the validation function
 const bcrypt = require("bcrypt"); // Importing bcrypt for password hashing
+const cookieParser = require("cookie-parser"); // Importing cookie-parser for handling cookies
+const jwt = require("jsonwebtoken"); // Importing jsonwebtoken for creating JWT tokens
 
 app.use(express.json()); // Middleware to parse JSON bodies
+app.use(cookieParser()); // Middleware to parse cookies
 
 //Creating a psot Api key for signup
 app.post("/signup", async (req, res) => {
   try {
     //Validation of data
     validateSignupData(req); // This will throw an error if validation fails
-    const { firstName, lastName, email, password } = req.body;   // Destructuring the request body to get user data
+    const { firstName, lastName, email, password } = req.body; // Destructuring the request body to get user data
 
     //Encrypt the password before saving it to the database
 
@@ -35,23 +38,52 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.post("/login",async(req,res)=>{
-    try{
-        const {email,password} = req.body;
-        const user = await User.findOne({ email:email }); // Finding the user by email
-        if (!user) {
-            throw new Error ("Invalid credentials");
-        }
-        const isPasswordValid = await bcrypt.compare(password, user.password); // Comparing the provided password with the hashed password
-        if(isPasswordValid){
-            res.send("Login successful");
-        }
-        else{
-           throw new Error("Invalid credentials");
-        }
-    }catch(err){
-        res.status(400).send("Internal Server Error " + err.message);
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email: email }); // Finding the user by email
+    if (!user) {
+      throw new Error("Invalid credentials");
     }
+    const isPasswordValid = await bcrypt.compare(password, user.password); // Comparing the provided password with the hashed password
+    if (isPasswordValid) {
+      //Create a JWT token
+      const token = await jwt.sign({_id: user._id},"DEVTINDER@" ); // Signing the token with a secret key
+      console.log(token);
+
+      //Add the token to cookie and send the response back to the user
+      res.cookie("token", token);
+      res.send("Login successful");
+    } else {
+      throw new Error("Invalid credentials");
+    }
+  } catch (err) {
+    res.status(400).send("Internal Server Error " + err.message);
+  }
+});
+
+app.get("/profile", async (req, res) => {
+  try {
+    const cookies = req.cookies; // Accessing cookies from the request object
+    const { token } = cookies; // Extracting the token from cookies
+
+    if(!token){
+      throw new Error("invalid token");     //if the token is not there/present.
+    } 
+
+    //Valiadte the token here
+    const decodedmessage = await jwt.verify(token, "DEVTINDER@"); // Verifying the token with the secret key
+    const { _id } = decodedmessage; // Extracting the user ID from the decoded message
+    console.log("logged in user id : " + _id); // Logging the decoded message for debugging
+    const user = await User.findById(_id); // Finding the user by ID
+    if(!user){
+      throw new Error("User not present");  //User not present . Login again.
+    }
+
+    res.send(user); // Sending the user data back to the client
+  } catch (err) {
+    res.status(400).send("Error " + err.message); // Sending an error response if something goes wrong
+  }
 });
 
 //Try to find a user by email : Using a get API
