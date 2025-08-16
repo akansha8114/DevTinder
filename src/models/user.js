@@ -1,6 +1,8 @@
 //at this place we are defining the user schema
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
     firstName : {
@@ -65,6 +67,18 @@ const userSchema = new mongoose.Schema({
     timestamps: true // Automatically adds createdAt and updatedAt fields
 });
 
+//Mongoose Schema methods
+userSchema.methods.getJWT = async function(){
+    const user = this; // 'this' refers to the current user instance
+    const token = await jwt.sign({_id:user._id},"DEVTINDER",{expiresIn:"1d"}); // Creating a JWT token with user ID and expiration time
+    return token; // Returning the generated token
+}
+
+userSchema.methods.vaidatePassword = async function(passwordInputByUser){
+    const user = this;
+    const isPasswordValid = await bcrypt.compare(passwordInputByUser, user.password); // Comparing the input password with the stored hashed password
+    return isPasswordValid; // Returning true if the password is valid, otherwise false
+}
 //Creating a user model for the user schema
 const UserModel = mongoose.model('User', userSchema);
 module.exports = UserModel;
