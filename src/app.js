@@ -7,6 +7,7 @@ const validateSignupData = require("./utils/validation"); // Importing the valid
 const bcrypt = require("bcrypt"); // Importing bcrypt for password hashing
 const cookieParser = require("cookie-parser"); // Importing cookie-parser for handling cookies
 const jwt = require("jsonwebtoken"); // Importing jsonwebtoken for creating JWT tokens
+const userAuth = require("./middleware/auth"); // Importing the authentication middleware
 
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cookieParser()); // Middleware to parse cookies
@@ -48,11 +49,11 @@ app.post("/login", async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.password); // Comparing the provided password with the hashed password
     if (isPasswordValid) {
       //Create a JWT token
-      const token = await jwt.sign({_id: user._id},"DEVTINDER@" ); // Signing the token with a secret key
+      const token = await jwt.sign({_id: user._id},"DEVTINDER@",{expiresIn: "1d"} ); // Signing the token with a secret key
       console.log(token);
 
       //Add the token to cookie and send the response back to the user
-      res.cookie("token", token);
+      res.cookie("token", token,{expires:new Date(Date.now() + 8* 3600000)}); // Setting the token in a cookie with an expiration of 8 hours 
       res.send("Login successful");
     } else {
       throw new Error("Invalid credentials");
@@ -62,23 +63,9 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/profile", async (req, res) => {
+app.get("/profile",userAuth, async (req, res) => {
   try {
-    const cookies = req.cookies; // Accessing cookies from the request object
-    const { token } = cookies; // Extracting the token from cookies
-
-    if(!token){
-      throw new Error("invalid token");     //if the token is not there/present.
-    } 
-
-    //Valiadte the token here
-    const decodedmessage = await jwt.verify(token, "DEVTINDER@"); // Verifying the token with the secret key
-    const { _id } = decodedmessage; // Extracting the user ID from the decoded message
-    console.log("logged in user id : " + _id); // Logging the decoded message for debugging
-    const user = await User.findById(_id); // Finding the user by ID
-    if(!user){
-      throw new Error("User not present");  //User not present . Login again.
-    }
+    const user = req.user; // The user object is attached to the request by the userAuth middleware
 
     res.send(user); // Sending the user data back to the client
   } catch (err) {
@@ -86,62 +73,15 @@ app.get("/profile", async (req, res) => {
   }
 });
 
-//Try to find a user by email : Using a get API
-app.get("/user", async (req, res) => {
-  const userEmail = req.body.email;
-  try {
-    const user = await User.find({ email: userEmail });
-    res.send(user);
-  } catch (err) {
-    res.status(400).send("User not found");
+app.post("/sendconnectionrequest",userAuth,async(req,res)=>{  
+  try{
+    const user = req.user; // The user object is attached to the request by the userAuth middleware
+    res.send(user.firstName + " Sent the Connection request  " );
+  }catch(err){
+    res.status(400).send("Error " + err.message); // Sending an error response if something goes wrong
   }
-});
-
-//Feed API to get all users on the feed of the user app to swipe left or right
-app.get("/feed", async (req, res) => {
-  try {
-    const users = await User.find({}); //This will return all users in the database
-    res.send(users);
-  } catch (err) {
-    res.status(500).send("Error fetching users");
-  }
-});
-
-//Deleting a user by ID
-app.delete("/user", async (req, res) => {
-  const userId = req.body.userId;
-  try {
-    const user = await User.findByIdAndDelete(userId);
-    res.send("User deleted successfully");
-  } catch (err) {
-    res.status(500).send("Error deleting user");
-  }
-});
-
-//Updating data of a user
-app.patch("/user/:userId", async (req, res) => {
-  const userId = req.params?.userId; // Extracting userId dynamically from the request parameters
-  const updateData = req.body; // Assuming updateData contains the fields to be updated
-  try {
-    const ALLOWED_UPDATES = ["photourl", "about", "gender", "age", "skills"];
-    const isUpdateAllowed = Object.keys(updateData).every(
-      (
-        k // Checking if the keys we are updatingis allowed to be updated or not
-      ) => ALLOWED_UPDATES.includes(k)
-    );
-    if (!isUpdateAllowed) {
-      throw new error("Update not allowed");
-    }
-
-    const user = await User.findByIdAndUpdate({ _id: userId }, updateData, {
-      runValidators: true, // This option ensures that the validators are run on the updated fields
-    });
-
-    res.send("User updated successfully");
-  } catch (err) {
-    res.status(500).send("Error updating user " + err.message);
-  }
-});
+  
+})
 
 connectDB()
   .then(() => {
