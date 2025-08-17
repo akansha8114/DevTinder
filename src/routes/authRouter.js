@@ -57,4 +57,15 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.post("/logout",async(req,res)=>{
+  try{
+    res.cookie("token", null,{
+      expires:new Date(Date.now()),
+    })
+    res.send("Logout successful"); // Sending a response back to the user indicating successful logout
+  }catch(err){
+    res.status(400).send("Internal Server Error " + err.message); // Sending an error response if something goes wrong
+  }
+})
+
 module.exports = router; // Exporting the router to be used in the main app

@@ -14,4 +14,23 @@ const validateSignupData = (req) => {
     return true;
 };
 
-module.exports = validateSignupData;
+const validateEditProfileData = (req) => {
+  try {
+    const allowedEditFields = [
+      "firstName",
+      "lastName",
+      "photourl",
+      "about",
+      "age",
+      "gender",
+    ];
+    const isEditAllowed = Object.keys(req.body).every((field) =>
+      allowedEditFields.includes(field)
+    ); // Checking if all fields in the request body are allowed for editing
+    return isEditAllowed;
+  } catch (err) {
+    throw new Error("Error in validating edit profile data: " + err.message);
+  }
+};
+
+module.exports = { validateSignupData, validateEditProfileData };
