@@ -12,7 +12,7 @@ const userAuth = async (req, res, next) => {
         throw new Error("No token provided"); // If no token is found, throw an error
     }
 
-    const decodeOBJ = await jwt.verify(token, "DEVTINDER@"); // Verifying the token with the secret key
+    const decodeOBJ = await jwt.verify(token, "DEVTINDER"); // Verifying the token with the secret key
     const { _id } = decodeOBJ; // Extracting the user ID from the decoded token
     const user = await User.findById(_id); // Finding the user by ID
     if(!user){
@@ -21,7 +21,7 @@ const userAuth = async (req, res, next) => {
     req.user = user; // Attaching the user object to the request for further use
     next(); // Proceed to the next middleware or route handler
   } catch (err) {
-    return res.status(401).send("Unauthorized " + err.message); // If token verification fails, send an unauthorized response
+    res.status(401).send("Unauthorized " + err.message); // If token verification fails, send an unauthorized response
   }
 };
 
