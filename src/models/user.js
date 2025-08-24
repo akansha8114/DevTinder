@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
     email : {
         type : String,
         required : true,
+        index : true,
         unique : true ,// Ensuring that email is unique for each user
         lowercase: true, // Storing email in lowercase to avoid case sensitivity issues
         trim: true, // Trimming whitespace from email
@@ -67,6 +68,7 @@ const userSchema = new mongoose.Schema({
     timestamps: true // Automatically adds createdAt and updatedAt fields
 });
 
+userSchema.index({firstName:1, lastName:1}); // Creating a compound index on first name and last name for efficient searching
 //Mongoose Schema methods
 userSchema.methods.getJWT = async function(){
     const user = this; // 'this' refers to the current user instance
