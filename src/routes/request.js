@@ -47,4 +47,33 @@ router.post("/request/:status/:toUserId", userAuth, async(req,res) => {
   
 });
 
+router.post("/request/review/:status/:requestId",userAuth,async(req,res)=>{
+  try{
+    const loggedInUser = req.user._id;
+    const {status,requestId} = req.params;
+
+    const allowedStatus = ["accepted","rejected"];
+    if(!allowedStatus.includes(status)){
+      return res.status(400).send("Invalid status type");
+    }
+    // Fetch the connection request to ensure it exists and is directed to the logged-in user
+    const connectionRequest = await ConnectionRequest.findOne({
+      _id:requestId,
+      toUserId:loggedInUser._id,
+      status:"interested",
+    });
+    if(!connectionRequest){
+      return res.status(404).send("No pending connection request found");
+    }
+    connectionRequest.status = status; // Updating the status of the connection request
+    const data = await connectionRequest.save(); // Saving the updated connection request
+    res.json({
+      message: "Connection request " + status + " successfully",
+      data
+    })
+  }catch(err){
+    res.status(400).send("Error " + err.message);
+  }
+})
+
 module.exports = router; // Exporting the router to be used in the main app
