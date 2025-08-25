@@ -4,6 +4,7 @@ const mongoose = require('mongoose');   // Importing mongoose for MongoDB object
 const connectionRequestSchema = new mongoose.Schema({
     fromUserId:{
         type : mongoose.Schema.Types.ObjectId, // Using ObjectId type for MongoDB references
+        ref: "User", // Referencing the User model means linking to the users collection
         required : true,
     },
 

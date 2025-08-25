@@ -11,10 +11,12 @@ app.use(cookieParser()); // Middleware to parse cookies
 const authrouter = require("./routes/authRouter");
 const requestRouter = require("./routes/request");
 const profilerouter = require("./routes/profile");
+const userRouter = require("./routes/userRouter");
 
 app.use("/", authrouter); // Using the auth router for authentication routes
 app.use("/", requestRouter); // Using the request router for connection requests
 app.use("/", profilerouter); // Using the profile router for user profile routes
+app.use("/",userRouter);
 
 connectDB()
   .then(() => {
