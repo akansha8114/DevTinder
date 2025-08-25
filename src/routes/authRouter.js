@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const validateSignupData = require("../utils/validation"); // Importing the validation function
+const {validateSignupData} = require("../utils/validation"); // Importing the validation function
 const bcrypt = require("bcrypt"); // Importing bcrypt for password hashing
 const jwt = require("jsonwebtoken"); // Importing jsonwebtoken for creating JWT tokens
 
@@ -10,7 +10,7 @@ router.post("/signup", async (req, res) => {
   try {
     //Validation of data
     validateSignupData(req); // This will throw an error if validation fails
-    const { firstName, lastName, email, password } = req.body; // Destructuring the request body to get user data
+    const { firstName, lastName, email, password ,gender,photourl,about,skills,age} = req.body; // Destructuring the request body to get user data
 
     //Encrypt the password before saving it to the database
 
@@ -22,6 +22,10 @@ router.post("/signup", async (req, res) => {
       lastName,
       email,
       password: passwordhash, // Storing the hashed password
+      gender,
+      photourl,
+      about, skills,
+      age,
     });
 
     await user.save(); //Saving the user to the database
