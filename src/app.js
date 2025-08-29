@@ -4,7 +4,14 @@ const app = express();
 const User = require("./models/user"); // Assuming you have a User model defined
 const { ReturnDocument } = require("mongodb");
 const cookieParser = require("cookie-parser"); // Importing cookie-parser for handling cookiess
+const cors = require("cors"); // Importing cors for handling cross-origin requests
 
+app.use(cors(
+  {
+    origin: "http://localhost:5173",
+    credentials: true,
+  }
+)); // Enabling CORS for all routes
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cookieParser()); // Middleware to parse cookies
 

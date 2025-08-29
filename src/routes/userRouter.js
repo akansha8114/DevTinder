@@ -75,7 +75,7 @@ router.get("/feed", userAuth, async(req,res) => {
         //Create a set of user ids to be hidden from the feed
         const hideUsersFromFeed = new Set();
         connectionRequests.forEach((req) => {
-            hideUsersFromFeed.add(req,fromUserId.toString());
+            hideUsersFromFeed.add(req.fromUserId.toString());
             hideUsersFromFeed.add(req.toUserId.toString());
         });
 
@@ -87,7 +87,10 @@ router.get("/feed", userAuth, async(req,res) => {
             
             ]
         }).select(USER_SAFE_DATA).skip(skip).limit(limit); // Select only safe data fields
-        res.send(users);
+        res.json({
+            message: "User feed fetched successfully",
+            data: users,
+        });
 
     }catch(err){
         res.status(400).send("Error " + err.message);

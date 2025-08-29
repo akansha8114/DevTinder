@@ -41,7 +41,7 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email: email }); // Finding the user by email
     if (!user) {
-      throw new Error("Invalid credentials");
+      res.status(401).send("Please login!!! User not found");
     }
     const isPasswordValid = await user.vaidatePassword(password); // Comparing the provided password with the hashed password
     if (isPasswordValid) {
@@ -52,12 +52,12 @@ router.post("/login", async (req, res) => {
       res.cookie("token", token, {
         expires: new Date(Date.now() + 8 * 3600000),
       }); // Setting the token in a cookie with an expiration of 8 hours
-      res.send("Login successful");
+      res.send(user);
     } else {
       throw new Error("Invalid credentials");
     }
   } catch (err) {
-    res.status(400).send("Internal Server Error " + err.message);
+    res.status(400).send( err.message);
   }
 });
 
