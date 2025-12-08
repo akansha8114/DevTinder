@@ -9,7 +9,9 @@ const cors = require("cors"); // Importing cors for handling cross-origin reques
 app.use(cors(
   {
     origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // allow PATCH explicitly
     credentials: true,
+    allowedHeaders: ["Content-Type"],
   }
 )); // Enabling CORS for all routes
 app.use(express.json()); // Middleware to parse JSON bodies

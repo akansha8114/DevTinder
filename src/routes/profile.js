@@ -15,7 +15,7 @@ router.get("/profile/view",userAuth, async (req, res) => {
 
 router.patch("/profile/edit", userAuth, async (req, res) => {
   try {
-    if (!validateEditProfileData(req)) {
+    if (!validateEditProfileData(req.body)) {
       throw new Error("Invalid fields for editing profile"); // If validation fails, throw an error
     }
     const loggedInUser = req.user; // it contains the orignal data of the logged-in user
