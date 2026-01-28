@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { validateSignupData } = require("../utils/validation"); // Importing the validation function
 const bcrypt = require("bcrypt"); // Importing bcrypt for password hashing
-const jwt = require("jsonwebtoken"); // Importing jsonwebtoken for creating JWT tokens
+//const jwt = require("jsonwebtoken"); // Importing jsonwebtoken for creating JWT tokens
 
 const User = require("../models/user"); // Assuming you have a User model defined
 
@@ -39,11 +39,16 @@ router.post("/signup", async (req, res) => {
       age,
     });
 
-    await user.save(); //Saving the user to the database
-    res.send("User created successfully");
+     const savedUser = await user.save();
+    const token = await savedUser.getJWT();
+
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 8 * 3600000),
+    });
+
+    res.json({ message: "User Added successfully!", data: savedUser });
   } catch (err) {
-    console.error("Error creating user:", err);
-    res.status(400).send("Internal Server Error " + err.message);
+    res.status(400).send("ERROR : " + err.message);
   }
 });
 

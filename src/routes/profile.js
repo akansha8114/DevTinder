@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const userAuth = require("../middleware/auth"); // Importing the authentication middleware
+const {userAuth} = require("../middleware/auth"); // Importing the authentication middleware
 const {validateEditProfileData} = require("../utils/validation"); // Importing the validation function for editing profile
 
 router.get("/profile/view",userAuth, async (req, res) => {
@@ -19,14 +19,14 @@ router.patch("/profile/edit", userAuth, async (req, res) => {
       throw new Error("Invalid fields for editing profile"); // If validation fails, throw an error
     }
     const loggedInUser = req.user; // it contains the orignal data of the logged-in user
-    Object.keys(req.body).forEach((key) => {
-      loggedInUser[key] = req.body[key];
-    }); // Updating the user object with the new data from the request body
+    Object.keys(req.body).forEach((key) => (
+      loggedInUser[key] = req.body[key]
+    )); // Updating the user object with the new data from the request body
 
     await loggedInUser.save(); // Saving the updated user object to the database
 
     res.json({
-      message : "Profile updated successfully",
+      message: `${loggedInUser.firstName}, your profile updated successfuly`,
       data : loggedInUser, // Sending the updated user data back to the client
     });
      

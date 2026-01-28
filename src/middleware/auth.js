@@ -27,4 +27,6 @@ const userAuth = async (req, res, next) => {
   }
 };
 
-module.exports = userAuth; // Exporting the middleware function for use in other files
+module.exports = {
+  userAuth,
+}; // Exporting the middleware function for use in other files
