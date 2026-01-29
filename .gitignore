@@ -1,3 +1,4 @@
 node_modules
 homework.md
 src/config/database.js
+.env

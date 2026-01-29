@@ -11,11 +11,13 @@ const getSecretRoomId = (userId, targetUserId) => {
 };
 
 const initializeSocket = (server) => {
-  const io = socket(server, {
-    cors: {
-      origin: "http://localhost:5173",
-    },
-  });
+ const io = socket(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    credentials: true,  //changes made here
+    methods: ["GET", "POST"],//changes made here
+  },
+});
 
   io.on("connection", (socket) => {
     socket.on("joinChat", ({ firstName, userId, targetUserId }) => {

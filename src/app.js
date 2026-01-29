@@ -1,20 +1,32 @@
+require("dotenv").config();
 const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
 const http = require("http");
-const cookieParser = require("cookie-parser"); // Importing cookie-parser for handling cookiess
 const cors = require("cors"); // Importing cors for handling cross-origin requests
+const cookieParser = require("cookie-parser"); // Importing cookie-parser for handling cookiess
 
-require("dotenv").config();
 
 require("./utils/cronjob");
 
-app.use(cors(
-  {
+// app.use(cors(
+//   {
+//     origin: "http://localhost:5173",
+//     credentials: true,
+//   }
+// ));
+
+
+app.use(
+  cors({
     origin: "http://localhost:5173",
     credentials: true,
-  }
-));
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    //allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+// handle preflight
+
 
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cookieParser()); // Middleware to parse cookies
@@ -41,7 +53,7 @@ connectDB()
   .then(() => {
     console.log("Database connection established...");
     server.listen(process.env.PORT, () => {
-      console.log("Server is successfully listening on port 7777...");
+      console.log("Server is successfully listening on port 3000...");
     });
   })
   .catch((err) => {

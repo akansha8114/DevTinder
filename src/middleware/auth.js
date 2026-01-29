@@ -9,11 +9,12 @@ const userAuth = async (req, res, next) => {
     const cookies = req.cookies; // Accessing cookies from the request object
     const { token } = cookies; // Extracting the token from cookies
     if (!token) {
-      throw new Error("No token provided"); // If no token is found, throw an error
+      return res.status(401).send("Please login !!"); // If no token is found, throw an error
     }
 
-    const decodeOBJ = jwt.verify(token, "DEVTINDER"); // Verifying the token with the secret key
-    const { _id } = decodeOBJ; // Extracting the user ID from the decoded token
+    const decodedObj = await jwt.verify(token, process.env.JWT_SECRET);
+    //const decodeOBJ = jwt.verify(token, "DEVTINDER"); // Verifying the token with the secret key
+    const { _id } = decodedObj; // Extracting the user ID from the decoded token
     const user = await User.findById(_id); // Finding the user by ID
     if (!user) {
       throw new Error("User not found"); // If user is not found, throw an error
