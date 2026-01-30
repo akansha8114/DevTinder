@@ -39,12 +39,12 @@ const paymentRouter = require("./routes/payment");
 const initializeSocket = require("./utils/socket");
 const chatRouter = require("./routes/chat");
 
-app.use("/", authRouter); // Using the auth router for authentication routes
-app.use("/", requestRouter); // Using the request router for connection requests
-app.use("/", profileRouter); // Using the profile router for user profile routes
-app.use("/", userRouter);
-app.use("/", paymentRouter);
-app.use("/", chatRouter);
+app.use("/api", authRouter); // Using the auth router for authentication routes
+app.use("/api", requestRouter); // Using the request router for connection requests
+app.use("/api", profileRouter); // Using the profile router for user profile routes
+app.use("/api", userRouter);
+app.use("/api", paymentRouter);
+app.use("/api", chatRouter);
 
 const server = http.createServer(app);
 initializeSocket(server);

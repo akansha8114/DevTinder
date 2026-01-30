@@ -4,11 +4,11 @@ const {userAuth} = require("../middleware/auth"); // Importing the authenticatio
 const ConnectionRequest = require("../models/connectionRequest"); // Importing the connection request model
 const User = require("../models/user"); // Importing the user model
 
-
+console.log("🔥 userRouter FILE LOADED");
 const USER_SAFE_DATA = "firstName lastName age photourl gender about skills";
 
 
-router.get("/user/requests/recieved", userAuth,async(req,res)=>{
+router.get("/user/requests/received", userAuth, async (req, res) => {
     try{
         const loggedInUser = req.user;
         const connectionRequests = await ConnectionRequest.find({
@@ -21,7 +21,7 @@ router.get("/user/requests/recieved", userAuth,async(req,res)=>{
         });
 
     }catch(err){
-        res.status(400).send("Erro" + err.message);
+        res.status(400).send("Error" + err.message);
     }
 
 });

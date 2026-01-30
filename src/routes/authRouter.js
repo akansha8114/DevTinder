@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { validateSignupData } = require("../utils/validation"); // Importing the validation function
 const bcrypt = require("bcrypt"); // Importing bcrypt for password hashing
-//const jwt = require("jsonwebtoken"); // Importing jsonwebtoken for creating JWT tokens
+const jwt = require("jsonwebtoken"); // Importing jsonwebtoken for creating JWT tokens
 
 const User = require("../models/user"); // Assuming you have a User model defined
 
@@ -69,8 +69,8 @@ router.post("/login", async (req, res) => {
       //Add the token to cookie and send the response back to the user
       res.cookie("token", token, {
         httpOnly: true,
-        sameSite: "none",
-        secure: false, // localhost only
+        sameSite: "lax",
+        
         expires: new Date(Date.now() + 8 * 3600000),
       }); // Setting the token in a cookie with an expiration of 8 hours
       res.json(user);

@@ -1,21 +1,24 @@
-const validator = require('validator');
+const validator = require("validator");
 
 const validateSignupData = (req) => {
-    const {firstName, lastName, email, password} = req.body;
-    if(!firstName || !lastName ) {
-        throw new Error('First name and last name are required');
-    }
-    else if(!validator.isEmail(email)) {
-        throw new Error('Invalid email format');
-    }
-    else if(!validator.isStrongPassword(password)) {
-        throw new Error('Password is not strong enough');
-    }
-    return true;
+  const { firstName, lastName, email, password } = req.body;
+  if (!firstName || !lastName) {
+    throw new Error("First name and last name are required");
+  } else if (!validator.isEmail(email)) {
+    throw new Error("Invalid email format");
+  } else if (!validator.isStrongPassword(password)) {
+    throw new Error("Password is not strong enough");
+  }
+  return true;
 };
 
 const validateEditProfileData = (req) => {
   try {
+    // Add safety check
+    // if (!data || typeof data !== "object") {
+    //   return false;
+    // }
+
     const allowedEditFields = [
       "firstName",
       "lastName",
@@ -25,8 +28,8 @@ const validateEditProfileData = (req) => {
       "gender",
       "skills",
     ];
-    const isEditAllowed = Object.keys(req.body).every((field) =>
-      allowedEditFields.includes(field)
+    const isEditAllowed = Object.keys(req).every((field) =>
+      allowedEditFields.includes(field),
     ); // Checking if all fields in the request body are allowed for editing
     return isEditAllowed;
   } catch (err) {

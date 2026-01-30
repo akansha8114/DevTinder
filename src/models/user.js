@@ -49,6 +49,7 @@ const userSchema = new mongoose.Schema({
     },
     photourl:{
         type : String,
+        default: "https://images.icon-icons.com/1378/PNG/512/avatardefault_92824.png",
         validate(value){
             if(!validator.isURL(value)){
                 throw new Error("Invalid Photo URL");
@@ -72,7 +73,7 @@ userSchema.index({firstName:1, lastName:1}); // Creating a compound index on fir
 //Mongoose Schema methods
 userSchema.methods.getJWT = async function(){
     const user = this; // 'this' refers to the current user instance
-    const token = await jwt.sign({_id:user._id},"DEVTINDER",{expiresIn:"1d"}); // Creating a JWT token with user ID and expiration time
+    const token = await jwt.sign({_id:user._id},process.env.JWT_SECRET,{expiresIn:"1d"}); // Creating a JWT token with user ID and expiration time
     return token; // Returning the generated token
 }
 

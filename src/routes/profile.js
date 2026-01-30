@@ -15,6 +15,10 @@ router.get("/profile/view",userAuth, async (req, res) => {
 
 router.patch("/profile/edit", userAuth, async (req, res) => {
   try {
+    // if (!req.body || Object.keys(req.body).length === 0) {
+    //         return res.status(400).json({ error: "Request body is empty" });
+    // }
+
     if (!validateEditProfileData(req.body)) {
       throw new Error("Invalid fields for editing profile"); // If validation fails, throw an error
     }
